@@ -1,0 +1,373 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+
+        /* width */
+        ::-webkit-scrollbar {
+            width: 1px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        body {
+            font-family: "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #5E5E5E;
+            color: white;
+            width: 610px;
+            height: 500px;
+            max-height: 500px;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            background-color: #ee7202;
+            box-sizing: border-box;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px 0 5px;
+        }
+
+        .current-profile-title {
+            background-color: transparent;
+            height: 25px;
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .selected-profile {
+            background-color: #70ABAF !important;
+        }
+
+        .current-profile-title:focus, .current-profile-title:hover {
+            outline: 1px black solid;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .main-wrapper {
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 15% 85%;
+            padding: 1px;
+            max-height: 500px;
+        }
+
+        .profiles-list-container {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            #background-color: #767B91;
+            height: 500px;
+            max-height: 500px;
+            border-right: 1px solid #767B91;
+        }
+
+        .profiles-list {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .profiles-title {
+            font-weight: bold;
+            min-height: 40px;
+            padding: 5px 0;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+
+        .profile {
+            border-radius: 3px;
+            padding: 4px;
+            background-color: #ee7202;
+            font-weight: bold;
+            color: black;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
+            height: 35px;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+        }
+
+        .profile:hover {
+            background-color: #ffac86;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .headers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .headers-url-filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 50px;
+            max-height: 50px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+
+        .current-profile-container {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            height:455px;
+            position: relative;
+            padding-top: 3px;
+        }
+
+        .current-profile-headers-header, .current-profile-url-filter-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+
+        .header-entries-title {
+            font-weight: bold;
+            box-sizing: border-box;
+            font-size: 17px;
+            font-style: italic;
+        }
+
+        .profile-header-entry {
+            box-sizing: border-box;
+            gap: 5px;
+            width: 95%;
+            display: grid;
+            grid-template-columns: 5% 45% 45% 5%;
+            justify-content: space-between;
+        }
+
+        .header-url-filter-entry {
+            box-sizing: border-box;
+            gap: 5px;
+            width: 95%;
+            display: grid;
+            grid-template-columns: 5% 90% 5%;
+            justify-content: space-between;
+        }
+
+        .profile-header-entry input[type='text'] {
+            width: 100%;
+        }
+
+        .pause-toggle, .add-btn, .del-btn, .save-btn {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            font-weight: bold;
+            padding: 1px;
+            font-size: 30px;
+            transition: .2s ease-in-out;
+            width: 20px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .pause-toggle {
+            margin-right: 20px;
+        }
+
+        .pause-toggle svg, .add-btn svg, .save-btn svg, .del-btn svg {
+            width: inherit;
+            height: auto;
+        }
+
+        .import-drop-zone {
+            display: flex;
+            justify-content: flex-start;
+            width: 100px;
+            padding: 5px;
+            border: 2px dashed black;
+            box-sizing: border-box;
+            height: 35px;
+            margin: 5px 20px 5px 0;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+        }
+
+        .import-drop-zone svg {
+            width: 25px;
+            height: auto;
+        }
+
+        .import-active {
+            transform: scale(1.1);
+            border-color: #C2E812 !important;
+        }
+
+        .pause-toggle:hover, .add-btn:hover, .save-btn:hover, .del-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .add-btn:active, .save-btn:active, .del-btn:active, .import-btn:active {
+            transform: scale(0.9);
+        }
+
+        input {
+            border-radius: 3px;
+            outline: none;
+            border: none;
+            padding: 3px 5px;
+        }
+
+        .paused-blocker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.6);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 5px;
+            font-size: 20px;
+        }
+        .paused-blocker.visible-blocker {
+            display: flex;
+        }
+
+        .paused-blocker div {
+            background-color: #5E5E5E;
+            border-radius: 4px;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+    </style>
+    <title>header_modify</title>
+    <script type="text/javascript" src="popup.js">
+    </script>
+
+</head>
+<body>
+
+<div class="main-wrapper">
+
+    <div id='profiles-list-container' class="profiles-list-container">
+        <div class="profiles-title">Profiles</div>
+        <div id='profiles-list' class="profiles-list"></div>
+    </div>
+    <div class="right-panel">
+        <div class="header">
+            <input id="current-profile-title" class="current-profile-title">
+
+            <button id="pause-header-modifier" class="pause-toggle" title="toggle pause/run extension">
+            </button>
+
+            <div id="import-new" class="import-drop-zone" title="import profile via json">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="24" viewBox="0 0 24 24">
+                    <path d="M4.5,16 C4.77614237,16 5,16.2238576 5,16.5 L5,19.5010024 C5,20.3294295 5.67157288,21.0010024 6.5,21.0010024 L17.5,21.0010024 C18.3284271,21.0010024 19,20.3294295 19,19.5010024 L19,7.00100238 L15.5,7.00100238 C15.2238576,7.00100238 15,6.77714475 15,6.50100238 L15,3.00100238 L6.5,3.00100238 C5.67157288,3.00100238 5,3.67257525 5,4.50100238 L5,6.5 C5,6.77614237 4.77614237,7 4.5,7 C4.22385763,7 4,6.77614237 4,6.5 L4,4.50100238 C4,3.1202905 5.11928813,2.00100238 6.5,2.00100238 L15.4720225,2.00100238 C15.6047688,1.99258291 15.7429463,2.03684187 15.8535534,2.14744899 L19.8535534,6.14744899 C19.9641605,6.25805611 20.0084195,6.39623363 20,6.52897986 L20,19.5010024 C20,20.8817143 18.8807119,22.0010024 17.5,22.0010024 L6.5,22.0010024 C5.11928813,22.0010024 4,20.8817143 4,19.5010024 L4,16.5 C4,16.2238576 4.22385763,16 4.5,16 Z M16,3.70810916 L16,6.00100238 L18.2928932,6.00100238 L16,3.70810916 Z M12.2928932,11 L10.1464466,8.85355339 C9.95118446,8.65829124 9.95118446,8.34170876 10.1464466,8.14644661 C10.3417088,7.95118446 10.6582912,7.95118446 10.8535534,8.14644661 L13.8535534,11.1464466 C14.0488155,11.3417088 14.0488155,11.6582912 13.8535534,11.8535534 L10.8535534,14.8535534 C10.6582912,15.0488155 10.3417088,15.0488155 10.1464466,14.8535534 C9.95118446,14.6582912 9.95118446,14.3417088 10.1464466,14.1464466 L12.2928932,12 L4.5,12 C4.22385763,12 4,11.7761424 4,11.5 C4,11.2238576 4.22385763,11 4.5,11 L12.2928932,11 Z"/>
+                </svg>
+            </div>
+
+            <div class="header-buttons">
+                <button id="add-new-profile" class="add-btn" title="add profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
+                    </svg>
+                </button>
+                <button id="delete-profile" class="add-btn" title="delete profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                            <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                        </svg>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+        <div class="current-profile-container">
+            <div id="paused-blocker-elem" class="paused-blocker">
+                <div>
+                    header-modifier ist pausiert!
+                </div>
+            </div>
+            <div class="current-profile-headers-header">
+                <div class="header-entries-title">Request headers</div>
+                <button id="add-header" class="add-btn" title="add header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="headers-container" class="headers-container">
+            </div>
+            <hr style="width:97%; border-color: #ee7202;">
+            <div class="current-profile-url-filter-header">
+                <div class="header-entries-title">Request URL filters</div>
+                <button id="add-url-filter" class="add-btn" title="add url filter">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="header-url-filter-container" class="headers-url-filter-container">
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
