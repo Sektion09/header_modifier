@@ -99,11 +99,13 @@
         }
 
         .profiles-title {
+            display: flex;
             font-weight: bold;
             min-height: 40px;
-            padding: 5px 0;
             box-sizing: border-box;
             font-size: 18px;
+            align-items: center;
+            justify-content: center;
         }
 
         .profile {
@@ -215,7 +217,6 @@
             outline: none;
             font-weight: bold;
             padding: 1px;
-            font-size: 30px;
             transition: .2s ease-in-out;
             width: 20px;
             cursor: pointer;
@@ -242,6 +243,7 @@
             margin: 5px 20px 5px 0;
             cursor: pointer;
             transition: 0.2s ease-in-out;
+            border-radius: 3px;
         }
 
         .import-drop-zone svg {
@@ -280,11 +282,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-end;
-            padding: 5px;
-            font-size: 20px;
-        }
-        .paused-blocker.visible-blocker {
-            display: flex;
+            font-size: 16px;
         }
 
         .paused-blocker div {
@@ -292,7 +290,57 @@
             border-radius: 4px;
             padding: 10px;
             font-weight: bold;
+            margin-bottom: 15px;
         }
+
+        .pop-over {
+            position: absolute;
+            background-color: #ee7202;
+            border-radius: 4px;
+            padding: 10px;
+            font-weight: bold;
+            bottom: 15px;
+            align-self: center;
+            display: none;
+            transition: 0.3s ease-in-out;
+            font-size: 16px;
+        }
+
+        .paused-blocker.visible-blocker,  .pop-over.visible-pop-over {
+            display: flex;
+        }
+
+        .success {
+            background-color: limegreen !important;
+        }
+
+        .error {
+            background-color: crimson !important;
+        }
+
+        .shaking {
+            transition: none;
+            animation: horizontal-shaking 0.3s linear 1;
+            border-color: crimson !important;
+        }
+
+        @keyframes horizontal-shaking {
+            0% { transform: translateX(0) }
+            25% { transform: translateX(5px) }
+            50% { transform: translateX(-5px) }
+            75% { transform: translateX(5px) }
+            100% { transform: translateX(0) }
+        }
+
+        @keyframes skew-x-shakeng{
+            0% { transform: skewX(-15deg); }
+            5% { transform: skewX(15deg); }
+            10% { transform: skewX(-15deg); }
+            15% { transform: skewX(15deg); }
+            20% { transform: skewX(0deg); }
+            100% { transform: skewX(0deg); }
+        }
+
 
     </style>
     <title>header_modify</title>
@@ -344,6 +392,7 @@
                     header-modifier ist pausiert!
                 </div>
             </div>
+            <div id="message-to-user" class="pop-over">Profil erfolgreich importiert!</div>
             <div class="current-profile-headers-header">
                 <div class="header-entries-title">Request headers</div>
                 <button id="add-header" class="add-btn" title="add header">

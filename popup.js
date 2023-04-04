@@ -19,6 +19,7 @@ const deleteProfileId = 'delete-profile';
 const addHeaderId = 'add-header';
 const importJsonId = 'import-new';
 const pausedBlockerElemId = 'paused-blocker-elem';
+const messageToUserId = 'message-to-user';
 
 /* TYPES */
 class Profile {
@@ -97,7 +98,7 @@ class ProfilesContainer {
 /* GLOBAL DATA */
 let currentProfile = {};
 let profilesContainer = null;
-
+let messageToUser = null;
 
 /* METHODS */
 function getHeaderEntryDivElement(index) {
@@ -430,15 +431,43 @@ function handleFileDrop(e) {
         removeActiveMarkerFromDropZone();
         if (validateImportedProfileJson(json)) {
             importValidProfilesFromJson(json);
+            popOverMessageToUser('Profile successfully imported !', 3500, 'success');
             return;
-            // TODO message about success
         }
 
-        //TODO add error message
+        shakeDropZone();
+        popOverMessageToUser('Could not import Profile, please check your source !', 3500, 'error');
     };
     reader.readAsText(files[0]);
 
 };
+
+function shakeDropZone() {
+    const dropZone = document.getElementById(importJsonId);
+    dropZone.classList.add('shaking')
+    setTimeout(() => {
+        dropZone.classList.remove('shaking')
+    }, 350)
+}
+function popOverMessageToUser(message, ttl, additionalCssClass) {
+    if(messageToUser) {
+        clearTimeout(messageToUser);
+    }
+    const popOver = document.getElementById(messageToUserId);
+    popOver.innerText = message;
+    popOver.classList.add('visible-pop-over');
+    if(additionalCssClass) {
+        popOver.classList.add(additionalCssClass);
+    }
+
+    messageToUser = setTimeout(() => {
+        if(additionalCssClass) {
+            popOver.classList.remove(additionalCssClass);
+        }
+        popOver.classList.remove('visible-pop-over')
+        messageToUser = null;
+    }, ttl)
+}
 
 function validateImportedProfileJson(jsonObj) {
     if (Array.isArray(jsonObj)) {
