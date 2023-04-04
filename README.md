@@ -27,7 +27,7 @@ You can also import profiles with the following structure:
 }
 ```
 
-Import of multiple profilesat once is also possible:
+Import of multiple profiles at once is also possible:
 
 [
 	{
