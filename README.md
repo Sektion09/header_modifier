@@ -1,11 +1,11 @@
 # header_modifier
 
-This is an extension for chrome to modify request headers for XmlHttpRequests and request from type main_frame.
+This is an extension for chrome to modify request headers for XmlHttpRequests and main_frame request.
 You can also set a url regex filter to apply the header modification only to matching request urls.
-It also you to add profiles with multiple request headers and multiple url filters.
+It also allows you to add profiles with multiple request headers and multiple url filters.
 The data ist stored in local storage and not synchronized between browser instances with the same google profile.
 
-You can also import Profiles with the following structure:
+You can also import profiles with the following structure:
 
 ```
 {
@@ -27,7 +27,7 @@ You can also import Profiles with the following structure:
 }
 ```
 
-Import for Multiple Profiles is also possible:
+Import of multiple profilesat once is also possible:
 
 [
 	{
