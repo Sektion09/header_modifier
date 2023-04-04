@@ -88,7 +88,7 @@ function getRandomId() {
 }
 
 function getActiveRequestHeaders(activeProfile) {
-    return activeProfile.headers.filter(header => header.enabled);
+    return activeProfile.headers.filter(header => header.enabled && header.name && header.value);
 }
 
 function noUrlFilterIsActive(activeUrlFilters) {
