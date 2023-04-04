@@ -32,7 +32,7 @@ class Profile {
         this.title = 'Profile ' + count;
         this.headers = [new Header()];
         this.urlFilters = [new UrlFilter()];
-        this.id = 'p_' + Date.now();
+        this.id = 'p_' + count + Date.now();
     }
 
     static of(importedProfile) {
@@ -426,21 +426,29 @@ function handleFileDrop(e) {
     reader.onloadstart = function (e) {
     };
     reader.onload = function (e) {
-        let jsonString = e.target.result;
-        const json = JSON.parse(jsonString);
-        removeActiveMarkerFromDropZone();
-        if (validateImportedProfileJson(json)) {
-            importValidProfilesFromJson(json);
-            popOverMessageToUser('Profile successfully imported !', 3500, 'success');
-            return;
-        }
+        try {
+            const jsonString = e.target.result;
+            const json = JSON.parse(jsonString);
+            removeActiveMarkerFromDropZone();
+            if (validateImportedProfileJson(json)) {
+                importValidProfilesFromJson(json);
+                popOverMessageToUser('Profile successfully imported !', 3500, 'success');
+                return;
+            }
 
-        shakeDropZone();
-        popOverMessageToUser('Could not import Profile, please check your source !', 3500, 'error');
+            onProfileImportFailed();
+        } catch (e) {
+            onProfileImportFailed();
+        }
     };
     reader.readAsText(files[0]);
 
 };
+
+function onProfileImportFailed() {
+    shakeDropZone();
+    popOverMessageToUser('Could not import Profile, please check your source !', 3500, 'error');
+}
 
 function shakeDropZone() {
     const dropZone = document.getElementById(importJsonId);
@@ -449,19 +457,20 @@ function shakeDropZone() {
         dropZone.classList.remove('shaking')
     }, 350)
 }
+
 function popOverMessageToUser(message, ttl, additionalCssClass) {
-    if(messageToUser) {
+    if (messageToUser) {
         clearTimeout(messageToUser);
     }
     const popOver = document.getElementById(messageToUserId);
     popOver.innerText = message;
     popOver.classList.add('visible-pop-over');
-    if(additionalCssClass) {
+    if (additionalCssClass) {
         popOver.classList.add(additionalCssClass);
     }
 
     messageToUser = setTimeout(() => {
-        if(additionalCssClass) {
+        if (additionalCssClass) {
             popOver.classList.remove(additionalCssClass);
         }
         popOver.classList.remove('visible-pop-over')
@@ -527,6 +536,7 @@ function importValidProfilesFromJson(validJsonObj) {
 function importValidProfile(importingProfile) {
     const urlFilters = importingProfile.urlFilters ? importingProfile.urlFilters : (importingProfile.filters ? importingProfile.filters : [new UrlFilter()]);
     const profile = Profile.of({...importingProfile, urlFilters});
+    profile.id = 'p_' + Date.now() + profilesContainer.profiles.length;
     profilesContainer.profiles.push(profile);
 }
 
