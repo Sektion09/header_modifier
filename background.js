@@ -58,7 +58,7 @@ function getAddRulesObj(id) {
         condition: {
             urlFilter: '*',
             resourceTypes: [
-                'xmlhttprequest',
+                'xmlhttprequest', 'main_frame'
             ]
         }
     }
