@@ -7,3 +7,6 @@
 - Profile Name can be changed.
 - Extension can be paused/unpaused.
 - Import and validation of profiles via json
+
+## Version - 1.1
+- Added feature to export profiles as json file

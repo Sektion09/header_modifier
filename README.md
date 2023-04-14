@@ -5,7 +5,7 @@ You can also set a url regex filter to apply the header modification only to mat
 It also allows you to add profiles with multiple request headers and multiple url filters.
 The data ist stored in local storage and not synchronized between browser instances with the same google profile.
 
-You can also import profiles with the following structure:
+You can also import profiles via drag and drop with the following structure:
 
 ```
 {
@@ -27,8 +27,8 @@ You can also import profiles with the following structure:
 }
 ```
 
-Import of multiple profiles at once is also possible:
-
+The import of multiple profiles at once is also possible:
+```
 [
 	{
     	"title": "ProfileName",
@@ -65,3 +65,6 @@ Import of multiple profiles at once is also possible:
     	"urlFilters": [],
     }
 ]
+```
+
+You can export existing profiles to a json file e.g. to share with others.

@@ -20,6 +20,13 @@ const addHeaderId = 'add-header';
 const importJsonId = 'import-new';
 const pausedBlockerElemId = 'paused-blocker-elem';
 const messageToUserId = 'message-to-user';
+const exportProfileOverlayBtnId = 'export-profile-overlay-btn';
+const exportOverlayContainerId = 'export-overlay-container';
+const exportProfilesContainerId = 'export-profiles-container';
+const downloadExportJsonId = 'download-export-json';
+const exportJsonTextAreaId = 'export-json-text-area';
+const closeOverlayButtonId = 'close-overlay-btn';
+const exportSelectAllId = 'export-select-all';
 
 /* TYPES */
 class Profile {
@@ -99,6 +106,8 @@ class ProfilesContainer {
 let currentProfile = {};
 let profilesContainer = null;
 let messageToUser = null;
+let overlayActive = false;
+let exportProfilesJson = '';
 
 /* METHODS */
 function getHeaderEntryDivElement(index) {
@@ -165,7 +174,6 @@ function onStoredData() {
     }
 }
 
-
 function addProfile() {
     const addedProfile = new Profile(profilesContainer.profiles.length + 1);
     const appendedProfiles = [...profilesContainer.profiles, addedProfile];
@@ -229,6 +237,7 @@ function createHeaderEntryElement(index, headerData, headerEntriesContainer) {
     headerEntryElement.appendChild(headerEntryInputValueElement);
 
     const headerEntryDeleteElement = getDeleteButtonElement('header_delete_btn_' + index, 'del-btn', delete_button_svg);
+    headerEntryDeleteElement.title = 'delete header entry';
     headerEntryDeleteElement.onclick = function (event) {
         deleteHeaderEntry(headerEntryElement.id);
     };
@@ -249,6 +258,7 @@ function createUrlFilterEntryElement(index, urlFilterData, urlFilterEntriesConta
     urlFilterEntryElement.appendChild(urlFilterEntryInputValueElement);
 
     const urlFilterEntryDeleteElement = getDeleteButtonElement('url_filter_btn_' + index, 'del-btn', delete_button_svg);
+    urlFilterEntryDeleteElement.title = 'delete url filter entry';
     urlFilterEntryDeleteElement.onclick = function (event) {
         deleteUrlFilterEntry(urlFilterEntryElement.id);
     };
@@ -328,6 +338,81 @@ function getProfileItemElement(profile) {
     return div;
 }
 
+function getProfileExportItemElement(profile) {
+    const div = document.createElement('div');
+    div.className = 'export-profile-entry';
+    div.title = profile.title;
+
+    const span = document.createElement('label');
+    span.innerText = profile.title;
+
+    const checkbox = getCheckboxElement('checkbox_' + profile.id);
+    checkbox.value = profile.id;
+    checkbox.onclick = generateExportJson;
+
+    div.appendChild(checkbox);
+    div.appendChild(span);
+
+    return div;
+}
+
+function generateExportJson() {
+    const exportProfiles = getProfilesToExport();
+    if(exportProfiles?.length > 0) {
+        const clonedProfiles = JSON.parse(JSON.stringify(exportProfiles)).map(p => {
+            delete p.id;
+            return p;
+        });
+        exportProfilesJson = JSON.stringify(clonedProfiles, null, 2);
+    }else{
+        exportProfilesJson = ''
+    }
+    document.getElementById(exportJsonTextAreaId).value = exportProfilesJson;
+    setDisableStatusOfExportDownloadButton();
+}
+
+function setDisableStatusOfExportDownloadButton() {
+    const downloadExportButton = document.getElementById(downloadExportJsonId);
+    disableButton(downloadExportButton, !exportProfilesJson);
+}
+
+function disableButton(buttonElem, disabled) {
+    buttonElem.disabled = disabled;
+    if(disabled) {
+        buttonElem.classList.add('disabled');
+        return;
+    }
+    buttonElem.classList.remove('disabled');
+}
+
+function getProfilesToExport() {
+    return profilesContainer.profiles
+        .filter(profile => document.getElementById('checkbox_' + profile.id).checked);
+}
+
+function exportSelectAll() {
+    profilesContainer.profiles
+        .forEach(profile => document.getElementById('checkbox_' + profile.id).checked = true);
+    generateExportJson();
+    document.getElementById(downloadExportJsonId).disabled = false;
+
+}
+
+function downloadExportJson() {
+    if (!exportProfilesJson) {
+        return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(exportProfilesJson);
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    let filename = JSON.parse(exportProfilesJson).map(p => p.title).join('+');
+    downloadAnchorNode.setAttribute("download", filename.substring(0, Math.min(75, filename.length)) + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    closeExportOverlay();
+}
+
 function loadProfile(profile) {
     const headerEntriesContainer = document.getElementById(headerEntriesContainerId);
     headerEntriesContainer.innerHTML = '';
@@ -360,11 +445,14 @@ function onInputUrlFilterChange(event) {
 
 function onProfileTitleChange(event) {
     const updatedTitle = event.target.value;
+    if (!updatedTitle) {
+        event.target.value = currentProfile.title;
+        return;
+    }
     currentProfile.title = updatedTitle;
     loadProfileItemButtonElements();
     storeProfiles();
 }
-
 
 function updateChangedHeaderRow(changedRowIndex, changedRow) {
     const changedHeaderEntryRowValues = [...changedRow.childNodes]
@@ -403,6 +491,15 @@ function loadProfileItemButtonElements() {
     })
 }
 
+function loadProfileItemsForExportElements() {
+    const exportProfilesListContainer = document.getElementById(exportProfilesContainerId);
+    exportProfilesListContainer.innerHTML = '';
+    profilesContainer.profiles.forEach(profile => {
+        const profileItemElement = getProfileExportItemElement(profile);
+        exportProfilesListContainer.appendChild(profileItemElement);
+    })
+}
+
 function handleDragOver(e) {
     document.querySelector(`#${importJsonId}`).classList.add("import-active");
     e.stopPropagation();
@@ -432,7 +529,7 @@ function handleFileDrop(e) {
             removeActiveMarkerFromDropZone();
             if (validateImportedProfileJson(json)) {
                 importValidProfilesFromJson(json);
-                popOverMessageToUser('Profile successfully imported !', 3500, 'success');
+                popOverMessageToUser('Profile(s) successfully imported!', 3500, 'success');
                 return;
             }
 
@@ -447,7 +544,7 @@ function handleFileDrop(e) {
 
 function onProfileImportFailed() {
     shakeDropZone();
-    popOverMessageToUser('Could not import Profile, please check your source !', 3500, 'error');
+    popOverMessageToUser('Could not import Profile, please check your source!', 3500, 'error');
 }
 
 function shakeDropZone() {
@@ -566,6 +663,30 @@ function togglePauseExtension() {
     storeProfiles();
 }
 
+function openExportProfilesOverlay() {
+    overlayActive = true;
+    const exportOverlayContainer = document.getElementById(exportOverlayContainerId);
+    const exportTextarea = document.getElementById(exportJsonTextAreaId);
+    exportTextarea.value = '';
+    exportOverlayContainer.classList.add('visible-overlay');
+    loadProfileItemsForExportElements();
+    setDisableStatusOfExportDownloadButton();
+}
+
+function closeExportOverlay(event) {
+    exportProfilesJson = '';
+    document.getElementById(exportOverlayContainerId).classList.remove('visible-overlay');
+}
+
+function onClickOnOverlayContainer(event) {
+    if (event.target.id !== exportOverlayContainerId) {
+        return;
+    }
+    event.stopPropagation();
+    event.preventDefault();
+    closeExportOverlay();
+}
+
 function updateTogglePauseButton() {
     const togglePauseBtn = document.getElementById(pauseHeaderModifierId);
     const pausedBlockerElem = document.getElementById(pausedBlockerElemId);
@@ -578,16 +699,21 @@ function updateTogglePauseButton() {
 
     pausedBlockerElem?.classList.remove('visible-blocker');
     togglePauseBtn.innerHTML = pausedSVG;
-
 }
+
 
 function addEventListeners() {
     document.getElementById(pauseHeaderModifierId).onclick = togglePauseExtension;
+    document.getElementById(exportProfileOverlayBtnId).onclick = openExportProfilesOverlay;
     document.getElementById(addNewProfileId).onclick = addProfile;
     document.getElementById(deleteProfileId).onclick = deleteProfile;
     document.getElementById(addHeaderId).onclick = addNewHeaderEntry;
     document.getElementById(addUrlFilterId).onclick = addNewUrlFilterEntry;
-    document.getElementById(currentProfileTitleId).oninput = onProfileTitleChange;
+    document.getElementById(currentProfileTitleId).onblur = onProfileTitleChange;
+    document.getElementById(downloadExportJsonId).onclick = downloadExportJson;
+    document.getElementById(exportOverlayContainerId).onclick = onClickOnOverlayContainer;
+    document.getElementById(closeOverlayButtonId).onclick = closeExportOverlay;
+    document.getElementById(exportSelectAllId).onclick = exportSelectAll;
 
     const importJsonDropZone = document.getElementById(importJsonId);
     importJsonDropZone.addEventListener('dragover', handleDragOver, false);

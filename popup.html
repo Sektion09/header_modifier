@@ -52,6 +52,7 @@
             height: 25px;
             font-weight: bold;
             font-size: 17px;
+            width: 30%;
         }
 
         .selected-profile {
@@ -64,9 +65,10 @@
 
         .header-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
             box-sizing: border-box;
+            margin: 5px 0;
         }
 
         .main-wrapper {
@@ -75,6 +77,7 @@
             grid-template-columns: 15% 85%;
             padding: 1px;
             max-height: 500px;
+            position: relative;
         }
 
         .profiles-list-container {
@@ -82,7 +85,6 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            #background-color: #767B91;
             height: 500px;
             max-height: 500px;
             border-right: 1px solid #767B91;
@@ -95,6 +97,7 @@
             gap: 5px;
             max-height: 500px;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 5px;
         }
 
@@ -110,21 +113,21 @@
 
         .profile {
             border-radius: 3px;
-            padding: 4px;
+            padding: 8px 4px;
             background-color: #ee7202;
             font-weight: bold;
             color: black;
             box-sizing: border-box;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: clip;
-            height: 35px;
-            min-height: 35px;
-            display: flex;
+            text-overflow: ellipsis;
+            width: 80px;
+            text-align: center;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: 0.2s ease-in-out;
+            min-height: 33px;
         }
 
         .profile:hover {
@@ -168,7 +171,7 @@
             flex-direction: column;
             align-items: flex-start;
             width: 100%;
-            height:455px;
+            height: 455px;
             position: relative;
             padding-top: 3px;
         }
@@ -211,7 +214,7 @@
             width: 100%;
         }
 
-        .pause-toggle, .add-btn, .del-btn, .save-btn {
+        .pause-toggle, .export-overlay-btn, .export-btn, .add-btn, .del-btn, .save-btn, .close-btn {
             background-color: transparent;
             border: none;
             outline: none;
@@ -223,11 +226,37 @@
             box-sizing: border-box;
         }
 
-        .pause-toggle {
-            margin-right: 20px;
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
         }
 
-        .pause-toggle svg, .add-btn svg, .save-btn svg, .del-btn svg {
+        .export-overlay-btn {
+            width: min-content !important;
+        }
+
+        .export-btn {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            width: min-content !important;
+            border-radius: 3px;
+            border: 1px solid black;
+            padding: 3px 5px;
+            white-space: nowrap;
+        }
+
+        .export-btn svg {
+            height: 20px;
+            width: auto;
+        }
+
+        .export-btn:not(.disabled):hover {
+            background-color: #ee7202;
+        }
+
+        .pause-toggle svg, .add-btn svg, .export-overlay-btn svg, .save-btn svg, .del-btn svg, .close-btn svg {
             width: inherit;
             height: auto;
         }
@@ -240,10 +269,13 @@
             border: 2px dashed black;
             box-sizing: border-box;
             height: 35px;
-            margin: 5px 20px 5px 0;
-            cursor: pointer;
+            cursor: grab;
             transition: 0.2s ease-in-out;
             border-radius: 3px;
+            align-items: center;
+            gap: 0 10px;
+            color: black;
+            font-weight: bold;
         }
 
         .import-drop-zone svg {
@@ -256,13 +288,14 @@
             border-color: #C2E812 !important;
         }
 
-        .pause-toggle:hover, .add-btn:hover, .save-btn:hover, .del-btn:hover {
+        .export-overlay-btn:hover, .pause-toggle:hover, .add-btn:hover, .save-btn:hover, .del-btn:hover, .close-btn:hover {
             transform: scale(1.2);
         }
 
-        .add-btn:active, .save-btn:active, .del-btn:active, .import-btn:active {
+        .export-overlay-btn:active, .pause-toggle:active, .export-btn:active, .add-btn:active, .save-btn:active, .del-btn:active, .close-btn:active {
             transform: scale(0.9);
         }
+
 
         input {
             border-radius: 3px;
@@ -306,7 +339,7 @@
             font-size: 16px;
         }
 
-        .paused-blocker.visible-blocker,  .pop-over.visible-pop-over {
+        .paused-blocker.visible-blocker, .pop-over.visible-pop-over, .export-overlay.visible-overlay {
             display: flex;
         }
 
@@ -325,22 +358,102 @@
         }
 
         @keyframes horizontal-shaking {
-            0% { transform: translateX(0) }
-            25% { transform: translateX(5px) }
-            50% { transform: translateX(-5px) }
-            75% { transform: translateX(5px) }
-            100% { transform: translateX(0) }
+            0% {
+                transform: translateX(0)
+            }
+            25% {
+                transform: translateX(5px)
+            }
+            50% {
+                transform: translateX(-5px)
+            }
+            75% {
+                transform: translateX(5px)
+            }
+            100% {
+                transform: translateX(0)
+            }
         }
 
-        @keyframes skew-x-shakeng{
-            0% { transform: skewX(-15deg); }
-            5% { transform: skewX(15deg); }
-            10% { transform: skewX(-15deg); }
-            15% { transform: skewX(15deg); }
-            20% { transform: skewX(0deg); }
-            100% { transform: skewX(0deg); }
+        .export-overlay {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            background-color: rgba(94, 94, 94, 0.61);
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
         }
 
+        .overlay-center {
+            display: flex;
+            flex-direction: column;
+            border-radius: 5px;
+            gap: 10px;
+            padding: 15px;
+            background-color: #e4e4e4;
+            position: relative;
+            box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+            width: 500px;
+            height:360px;
+        }
+
+        .export-overlay .title {
+            color: black;
+            font-weight: bold;
+            font-size: 19px;
+            text-align: start;
+        }
+
+        .export-overlay .export-content {
+            display: flex;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+
+        .export-content .export-profiles-container {
+            display: flex;
+            flex-direction: column;
+            width: 125px;
+            gap: 7px;
+            max-height: 275px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .export-content .export-profiles-container .export-profile-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: black;
+            font-size: 15px;
+        }
+
+        .export-profile-entry label {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .export-content textarea {
+            height: 290px;
+            width: 375px;
+            resize: none;
+            border-radius: 4px;
+        }
+
+        .export-overlay .export-button-panel {
+            display: flex;
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: flex-end;
+            gap: 15px;
+        }
 
     </style>
     <title>header_modify</title>
@@ -351,7 +464,6 @@
 <body>
 
 <div class="main-wrapper">
-
     <div id='profiles-list-container' class="profiles-list-container">
         <div class="profiles-title">Profiles</div>
         <div id='profiles-list' class="profiles-list"></div>
@@ -360,16 +472,22 @@
         <div class="header">
             <input id="current-profile-title" class="current-profile-title">
 
-            <button id="pause-header-modifier" class="pause-toggle" title="toggle pause/run extension">
-            </button>
-
-            <div id="import-new" class="import-drop-zone" title="import profile via json">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="24" viewBox="0 0 24 24">
-                    <path d="M4.5,16 C4.77614237,16 5,16.2238576 5,16.5 L5,19.5010024 C5,20.3294295 5.67157288,21.0010024 6.5,21.0010024 L17.5,21.0010024 C18.3284271,21.0010024 19,20.3294295 19,19.5010024 L19,7.00100238 L15.5,7.00100238 C15.2238576,7.00100238 15,6.77714475 15,6.50100238 L15,3.00100238 L6.5,3.00100238 C5.67157288,3.00100238 5,3.67257525 5,4.50100238 L5,6.5 C5,6.77614237 4.77614237,7 4.5,7 C4.22385763,7 4,6.77614237 4,6.5 L4,4.50100238 C4,3.1202905 5.11928813,2.00100238 6.5,2.00100238 L15.4720225,2.00100238 C15.6047688,1.99258291 15.7429463,2.03684187 15.8535534,2.14744899 L19.8535534,6.14744899 C19.9641605,6.25805611 20.0084195,6.39623363 20,6.52897986 L20,19.5010024 C20,20.8817143 18.8807119,22.0010024 17.5,22.0010024 L6.5,22.0010024 C5.11928813,22.0010024 4,20.8817143 4,19.5010024 L4,16.5 C4,16.2238576 4.22385763,16 4.5,16 Z M16,3.70810916 L16,6.00100238 L18.2928932,6.00100238 L16,3.70810916 Z M12.2928932,11 L10.1464466,8.85355339 C9.95118446,8.65829124 9.95118446,8.34170876 10.1464466,8.14644661 C10.3417088,7.95118446 10.6582912,7.95118446 10.8535534,8.14644661 L13.8535534,11.1464466 C14.0488155,11.3417088 14.0488155,11.6582912 13.8535534,11.8535534 L10.8535534,14.8535534 C10.6582912,15.0488155 10.3417088,15.0488155 10.1464466,14.8535534 C9.95118446,14.6582912 9.95118446,14.3417088 10.1464466,14.1464466 L12.2928932,12 L4.5,12 C4.22385763,12 4,11.7761424 4,11.5 C4,11.2238576 4.22385763,11 4.5,11 L12.2928932,11 Z"/>
-                </svg>
-            </div>
-
             <div class="header-buttons">
+                <button id="pause-header-modifier" class="pause-toggle" title="toggle pause/run extension">
+                </button>
+
+                <button id="export-profile-overlay-btn" class="export-overlay-btn" title="export profiles as json">
+                    <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M4 2a2 2 0 00-2 2v24a2 2 0 002 2h16a2 2 0 002-2v-2h-2v2H4V4h8v6a2 2 0 002 2h6v2h2v-3.586A2 2 0 0021.414 9L15 2.586A2 2 0 0013.586 2H4zm15.586 8L14 4.414V10h5.586zm10.828 10l-.707-.707-5-5-1.414 1.414L26.586 19H10v2h16.586l-3.293 3.293 1.414 1.414 5-5 .707-.707z"/>
+                    </svg>
+                </button>
+                <div id="import-new" class="import-drop-zone" title="import profile via json">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="24" viewBox="0 0 24 24">
+                        <path d="M4.5,16 C4.77614237,16 5,16.2238576 5,16.5 L5,19.5010024 C5,20.3294295 5.67157288,21.0010024 6.5,21.0010024 L17.5,21.0010024 C18.3284271,21.0010024 19,20.3294295 19,19.5010024 L19,7.00100238 L15.5,7.00100238 C15.2238576,7.00100238 15,6.77714475 15,6.50100238 L15,3.00100238 L6.5,3.00100238 C5.67157288,3.00100238 5,3.67257525 5,4.50100238 L5,6.5 C5,6.77614237 4.77614237,7 4.5,7 C4.22385763,7 4,6.77614237 4,6.5 L4,4.50100238 C4,3.1202905 5.11928813,2.00100238 6.5,2.00100238 L15.4720225,2.00100238 C15.6047688,1.99258291 15.7429463,2.03684187 15.8535534,2.14744899 L19.8535534,6.14744899 C19.9641605,6.25805611 20.0084195,6.39623363 20,6.52897986 L20,19.5010024 C20,20.8817143 18.8807119,22.0010024 17.5,22.0010024 L6.5,22.0010024 C5.11928813,22.0010024 4,20.8817143 4,19.5010024 L4,16.5 C4,16.2238576 4.22385763,16 4.5,16 Z M16,3.70810916 L16,6.00100238 L18.2928932,6.00100238 L16,3.70810916 Z M12.2928932,11 L10.1464466,8.85355339 C9.95118446,8.65829124 9.95118446,8.34170876 10.1464466,8.14644661 C10.3417088,7.95118446 10.6582912,7.95118446 10.8535534,8.14644661 L13.8535534,11.1464466 C14.0488155,11.3417088 14.0488155,11.6582912 13.8535534,11.8535534 L10.8535534,14.8535534 C10.6582912,15.0488155 10.3417088,15.0488155 10.1464466,14.8535534 C9.95118446,14.6582912 9.95118446,14.3417088 10.1464466,14.1464466 L12.2928932,12 L4.5,12 C4.22385763,12 4,11.7761424 4,11.5 C4,11.2238576 4.22385763,11 4.5,11 L12.2928932,11 Z"/>
+                    </svg>
+                    json
+                </div>
                 <button id="add-new-profile" class="add-btn" title="add profile">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                         <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>
@@ -377,10 +495,8 @@
                 </button>
                 <button id="delete-profile" class="add-btn" title="delete profile">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                            <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-                            <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-                        </svg>
+                        <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                        <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
                     </svg>
                 </button>
             </div>
@@ -389,7 +505,7 @@
         <div class="current-profile-container">
             <div id="paused-blocker-elem" class="paused-blocker">
                 <div>
-                    header-modifier ist pausiert!
+                    header-modifier is paused!
                 </div>
             </div>
             <div id="message-to-user" class="pop-over">Profil erfolgreich importiert!</div>
@@ -417,6 +533,34 @@
         </div>
     </div>
 
+    <div id="export-overlay-container" class="export-overlay">
+        <div class="overlay-center">
+            <button id="close-overlay-btn" class="close-btn"> <?xml version="1.0" ?><!DOCTYPE svg  PUBLIC
+                '-//W3C//DTD SVG 1.1//EN'
+                'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+                <svg height="512px" id="Layer_1" style="enable-background:new 0 0 512 512;" version="1.1"
+                     viewBox="0 0 512 512" width="512px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M443.6,387.1L312.4,255.4l131.5-130c5.4-5.4,5.4-14.2,0-19.6l-37.4-37.6c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4  L256,197.8L124.9,68.3c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4L68,105.9c-5.4,5.4-5.4,14.2,0,19.6l131.5,130L68.4,387.1  c-2.6,2.6-4.1,6.1-4.1,9.8c0,3.7,1.4,7.2,4.1,9.8l37.4,37.6c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1L256,313.1l130.7,131.1  c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1l37.4-37.6c2.6-2.6,4.1-6.1,4.1-9.8C447.7,393.2,446.2,389.7,443.6,387.1z"/></svg>
+            </button>
+            <div class="title">Which Profiles do you want to export?</div>
+            <div class="export-content">
+                <div id="export-profiles-container" class="export-profiles-container"></div>
+                <textarea id="export-json-text-area" ></textarea>
+            </div>
+            <div class="export-button-panel">
+                <button id="export-select-all" class="export-btn">
+                    select all
+                </button>
+                <button id="download-export-json" class="export-btn">
+                    <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M4 2a2 2 0 00-2 2v24a2 2 0 002 2h16a2 2 0 002-2v-2h-2v2H4V4h8v6a2 2 0 002 2h6v2h2v-3.586A2 2 0 0021.414 9L15 2.586A2 2 0 0013.586 2H4zm15.586 8L14 4.414V10h5.586zm10.828 10l-.707-.707-5-5-1.414 1.414L26.586 19H10v2h16.586l-3.293 3.293 1.414 1.414 5-5 .707-.707z"/>
+                    </svg>
+                    download json
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
